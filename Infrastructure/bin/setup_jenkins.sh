@@ -10,7 +10,51 @@ fi
 GUID=$1
 REPO=$2
 CLUSTER=$3
+JENKINS_PROJECT=$GUID-jenkins
 echo "Setting up Jenkins in project ${GUID}-jenkins from Git Repo ${REPO} for Cluster ${CLUSTER}"
+
+
+
+
+# # Build a local docker image
+# docker build . -t docker-registry-default.apps.testcoe3.appdevcoe.opentlc.com/briang-hw-jenkins/jenkins-slave-maven-appdev:v1
+
+# # Login to the registry and then push your local image to remote
+# docker login -u $(oc whoami) -p $(oc whoami -t) docker-registry-default.apps.testcoe3.appdevcoe.opentlc.com
+# docker push docker-registry-default.apps.testcoe3.appdevcoe.opentlc.com/briang-hw-jenkins/jenkins-slave-maven-appdev:v1
+
+
+
+
+# TODO:
+# Create a project based on a template
+# TODO: the template is referecing the briang hardcoded, should really be generic
+
+oc project $JENKINS_PROJECT
+
+oc process -f ../templates/jenkins-template.yml -p NAMESPACE=$JENKINS_PROJECT | oc create -f - -n $JENKINS_PROJECT
+
+echo "Building the slave"
+
+oc new-build --name=jenkins-slave-maven-appdev -D $'FROM docker.io/openshift/jenkins-slave-maven-centos7:v3.9\nUSER root\nRUN yum -y install skopeo\nUSER 1001' -n $JENKINS_PROJECT
+sleep 120
+
+echo "Configuring slave"
+# configure kubernetes PodTemplate plugin.
+oc new-app -f ../templates/jenkins-config.yml --param GUID=$GUID -n $JENKINS_PROJECT
+
+echo "Slave configured"
+
+
+
+
+# TODO: Create a build config template and sub in some paramters
+# then do 
+# oc process -f ../templates/jenkins-build-template.yml -p NAMESPACE=$JENKINS_PROJECT | oc create -f - -n $JENKINS_PROJECT
+
+
+
+
 
 # Code to set up the Jenkins project to execute the
 # three pipelines.
@@ -27,3 +71,6 @@ echo "Setting up Jenkins in project ${GUID}-jenkins from Git Repo ${REPO} for Cl
 # * CLUSTER: the base url of the cluster used (e.g. na39.openshift.opentlc.com)
 
 # To be Implemented by Student
+
+
+
