@@ -13,7 +13,7 @@ node('maven-appdev') {
 
     // Checkout Source Code.
     stage('Checkout Source') {
-      git url: 'https://github.com/cfoskin/appvdev_homework.git'
+      git url: 'https://github.com/briangallagher/advdev_homework_template.git'
     }
 
     dir("MLBParks") {
@@ -46,7 +46,7 @@ node('maven-appdev') {
       stage('Build and Tag OpenShift Image') {
         echo 'Build and Tag OpenShift Image'
 
-        
+
       }
       stage('Publish to Nexus') {
         echo 'Publish to Nexus'
