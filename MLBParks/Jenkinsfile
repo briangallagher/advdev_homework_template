@@ -32,16 +32,21 @@ node('maven-appdev') {
       echo "mvnCmd: ${mvnCmd}"
 
       stage('Build war') {
-        echo 'Build war'
+        echo "Building version ${devTag}"
+        sh "${mvnCmd} clean package -DskipTests"
       }
       stage('Unit Tests') {
-        echo 'Unit Tests'
+        echo "Running Unit Tests"
+        sh "${mvnCmd} test"
       }
       stage('Code Analysis') {
-        echo 'Code Analysis'
+        echo "Running Code Analysis"
+        sh "${mvnCmd} sonar:sonar -Dsonar.host.url=http://sonarqube-${GUID}-sonarqube.apps.na39.openshift.opentlc.com -Dsonar.projectName=${JOB_BASE_NAME}-${devTag}"
       }
       stage('Build and Tag OpenShift Image') {
         echo 'Build and Tag OpenShift Image'
+
+        
       }
       stage('Publish to Nexus') {
         echo 'Publish to Nexus'
