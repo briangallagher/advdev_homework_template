@@ -9,7 +9,8 @@ node('maven-appdev') {
   openshift.withCluster() {
     
     dir("MLBParks") {
-      
+
+      echo "${ls -la}"
       echo "${openshift.raw( "version" ).out}"
       echo "In project: ${openshift.project()}"
 
