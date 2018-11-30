@@ -1,26 +1,15 @@
-// Jenkinsfile for NationalParks
-podTemplate(
-  label: "skopeo-pod",
-  cloud: "openshift",
-  inheritFrom: "maven",
-  containers: [
-    containerTemplate(
-      name: "jnlp",
-      image: "docker-registry.default.svc:5000/${GUID}-jenkins/jenkins-slave-appdev",
-      resourceRequestMemory: "1Gi",
-      resourceLimitMemory: "2Gi"
-    )
-  ]
-) {
-  node('skopeo-pod') {
-    echo "GUID: ${GUID}"
-    echo "CLUSTER: ${CLUSTER}"
+node('maven-appdev') {
+  echo "GUID: ${GUID}"
+  echo "CLUSTER: ${CLUSTER}"
 
-    // Your Pipeline Code goes here. Make sure to use the ${GUID} and ${CLUSTER} parameters where appropriate
-    // You need to build the application in directory `Nationalparks`.
-    // Also copy "../nexus_settings.xml" to your build directory
-    // and replace 'GUID' in the file with your ${GUID} to point to >your< Nexus instance
+  // Your Pipeline Code goes here. Make sure to use the ${GUID} and ${CLUSTER} parameters where appropriate
+  // You need to build the application in directory `ParksMap`.
+  // Also copy "../nexus_settings.xml" to your build directory
+  // and replace 'GUID' in the file with your ${GUID} to point to >your< Nexus instance
 
+  openshift.withCluster(  ) {
+    echo "${openshift.raw( "version" ).out}"
+    echo "In project: ${openshift.project()}"
   }
 }
 

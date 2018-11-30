@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: bcTemplate
+objects:
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    labels:
+      build: "${BUILD_NAME}"
+    name: "${BUILD_NAME}"
+  spec:
+    source:
+      contextDir: "${CONTEXT}"
+      git:
+        uri: "${GIT_URL}"
+      type: Git
+    strategy:
+      type: "JenkinsPipeline"
+      jenkinsPipelineStrategy:
+        jenkinsfilePath: "${JENKINS_FILE_PATH}"
+parameters:
+- description: Build Name.
+  displayName: Build Name
+  name: BUILD_NAME
+  value: "pipeline build"
+- description: Context.
+  displayName: Context
+  name: CONTEXT
+  value: "./"
+- description: Git URL.
+  displayName: Git URL
+  name: GIT_URL
+  value: ""
+- description: Jenkins file path location 
+  displayName: Jenkins file path location 
+  name: JENKINS_FILE_PATH
+  value: "./"
+
+
+
+
+
+
+
+

@@ -32,6 +32,8 @@ echo "Setting up Jenkins in project ${GUID}-jenkins from Git Repo ${REPO} for Cl
 
 oc project $JENKINS_PROJECT
 
+echo "Creating jenkins"
+
 oc process -f ../templates/jenkins-template.yml -p NAMESPACE=$JENKINS_PROJECT | oc create -f - -n $JENKINS_PROJECT
 
 echo "Building the slave"
@@ -45,15 +47,16 @@ oc new-app -f ../templates/jenkins-config.yml --param GUID=$GUID -n $JENKINS_PRO
 
 echo "Slave configured"
 
+oc process -f ../templates/build-config-pipeline-template.yml -p BUILD_NAME="nationalparks-pipeline" -p CONTEXT="./Nationalparks" -p GIT_URL=https://github.com/briangallagher/advdev_homework_template.git -p JENKINS_FILE_PATH="./Jenkinsfile" | oc create -f - 
+oc process -f ../templates/build-config-pipeline-template.yml -p BUILD_NAME="mlbparks-pipeline" -p CONTEXT="./MLBParks" -p GIT_URL=https://github.com/briangallagher/advdev_homework_template.git -p JENKINS_FILE_PATH=".Jenkinsfile" | oc create -f - 
+oc process -f ../templates/build-config-pipeline-template.yml -p BUILD_NAME="parksmap-pipeline" -p CONTEXT="./ParksMap" -p GIT_URL=https://github.com/briangallagher/advdev_homework_template.git -p JENKINS_FILE_PATH="./Jenkinsfile" | oc create -f - 
 
+sleep 60
 
-
-# TODO: Create a build config template and sub in some paramters
-# then do 
-# oc process -f ../templates/jenkins-build-template.yml -p NAMESPACE=$JENKINS_PROJECT | oc create -f - -n $JENKINS_PROJECT
-
-
-
+echo "setting required envars for the build configs.."
+oc set env bc/mlbparks-pipeline GUID=$GUID CLUSTER=$CLUSTER -n $JENKINS_PROJECT
+oc set env bc/nationalparks-pipeline GUID=$GUID CLUSTER=$CLUSTER -n $JENKINS_PROJECT
+oc set env bc/parksmap-pipeline GUID=$GUID CLUSTER=$CLUSTER -n $JENKINS_PROJECT
 
 
 # Code to set up the Jenkins project to execute the

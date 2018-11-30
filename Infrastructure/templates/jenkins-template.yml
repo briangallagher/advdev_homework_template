@@ -34,7 +34,7 @@ objects:
     resources:
       requests:
         cpu: 2
-        memory: 2Gi
+        memory: 4Gi
         storage: "4Gi"
 - apiVersion: v1
   kind: DeploymentConfig
@@ -97,7 +97,7 @@ objects:
             timeoutSeconds: 240
           resources:
             limits:
-              memory: 2Gi
+              memory: 4Gi
               cpu: 3
           securityContext:
             capabilities: {}
