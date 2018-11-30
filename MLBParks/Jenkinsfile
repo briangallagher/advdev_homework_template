@@ -24,8 +24,38 @@ node('maven-appdev') {
     echo "mvnCmd: ${mvnCmd}"
 
 
-
-
+    stages {
+      stage('Build war') {
+        echo 'Build war'
+      }
+      stage('Unit Tests') {
+        echo 'Unit Tests'
+      }
+      stage('Code Analysis') {
+        echo 'Code Analysis'
+      }
+      stage('Build and Tag OpenShift Image') {
+        echo 'Build and Tag OpenShift Image'
+      }
+      stage('Publish to Nexus') {
+        echo 'Publish to Nexus'
+      }
+      stage('Deploy to Dev') {
+        echo 'Deploy to Dev'
+      }
+      stage('Integration Tests') {
+        echo 'Integration Tests'
+      }
+      stage('Copy Image to Nexus Docker Registry') {
+        echo 'Copy Image to Nexus Docker Registry'
+      }
+      stage('Blue/Green Production Deployment') {
+        echo 'Blue/Green Production Deployment'
+      }
+      stage('Switch over to new Version') {
+        echo 'Switch over to new Version'
+      }
+    }
 
 
   }
