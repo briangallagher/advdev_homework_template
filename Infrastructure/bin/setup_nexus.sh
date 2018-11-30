@@ -32,12 +32,12 @@ echo "Setting up Nexus in project $GUID-nexus"
 # To be Implemented by Student
 
 
-# oc project $NEXUS_PROJECT
+oc project $NEXUS_PROJECT
 
-# oc process -f ../templates/nexus-template.yml | oc create -f - -n $NEXUS_PROJECT 
-# echo "Waiting for Nexus to deploy..."
+oc process -f ../templates/nexus-template.yml | oc create -f - -n $NEXUS_PROJECT 
+echo "Waiting for Nexus to deploy..."
 
-# # sleep 60
+# sleep 60
 
 while : ; do
   echo "Checking if Nexus is Ready..."

@@ -48,7 +48,7 @@ oc new-app -f ../templates/jenkins-config.yml --param GUID=$GUID -n $JENKINS_PRO
 echo "Slave configured"
 
 oc process -f ../templates/build-config-pipeline-template.yml -p BUILD_NAME="nationalparks-pipeline" -p CONTEXT="./Nationalparks" -p GIT_URL=https://github.com/briangallagher/advdev_homework_template.git -p JENKINS_FILE_PATH="./Jenkinsfile" | oc create -f - 
-oc process -f ../templates/build-config-pipeline-template.yml -p BUILD_NAME="mlbparks-pipeline" -p CONTEXT="./MLBParks" -p GIT_URL=https://github.com/briangallagher/advdev_homework_template.git -p JENKINS_FILE_PATH=".Jenkinsfile" | oc create -f - 
+oc process -f ../templates/build-config-pipeline-template.yml -p BUILD_NAME="mlbparks-pipeline" -p CONTEXT="./MLBParks" -p GIT_URL=https://github.com/briangallagher/advdev_homework_template.git -p JENKINS_FILE_PATH="./Jenkinsfile" | oc create -f - 
 oc process -f ../templates/build-config-pipeline-template.yml -p BUILD_NAME="parksmap-pipeline" -p CONTEXT="./ParksMap" -p GIT_URL=https://github.com/briangallagher/advdev_homework_template.git -p JENKINS_FILE_PATH="./Jenkinsfile" | oc create -f - 
 
 sleep 60

@@ -6,10 +6,28 @@ node('maven-appdev') {
   // You need to build the application in directory `ParksMap`.
   // Also copy "../nexus_settings.xml" to your build directory
   // and replace 'GUID' in the file with your ${GUID} to point to >your< Nexus instance
-
-  openshift.withCluster(  ) {
+  openshift.withCluster() {
     echo "${openshift.raw( "version" ).out}"
     echo "In project: ${openshift.project()}"
+
+    def groupId = getGroupIdFromPom("pom.xml")
+    def artifactId = getArtifactIdFromPom("pom.xml")
+    def version = getVersionFromPom("pom.xml")
+    // Set the tag for the development image: version + build number
+    def devTag = "${version}-${BUILD_NUMBER}"
+    // Set the tag for the production image: version
+    def prodTag = "${version}"
+    echo " Dev TAG: ${devTag}"
+    echo " Prod TAG: ${prodTag}"
+
+    def mvnCmd = "mvn -s ./nexus_settings.xml"
+    echo "mvnCmd: ${mvnCmd}"
+
+
+
+
+
+
   }
 }
 
