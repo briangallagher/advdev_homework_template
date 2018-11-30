@@ -7,57 +7,59 @@ node('maven-appdev') {
   // Also copy "../nexus_settings.xml" to your build directory
   // and replace 'GUID' in the file with your ${GUID} to point to >your< Nexus instance
   openshift.withCluster() {
-    
-    dir("MLBParks") {
 
-      sh "ls -la"
-      echo "${openshift.raw( "version" ).out}"
-      echo "In project: ${openshift.project()}"
+    echo "${openshift.raw( "version" ).out}"
+    echo "In project: ${openshift.project()}"
 
-      def groupId = getGroupIdFromPom("pom.xml")
-      def artifactId = getArtifactIdFromPom("pom.xml")
-      def version = getVersionFromPom("pom.xml")
-      // Set the tag for the development image: version + build number
-      def devTag = "${version}-${BUILD_NUMBER}"
-      // Set the tag for the production image: version
-      def prodTag = "${version}"
-      echo " Dev TAG: ${devTag}"
-      echo " Prod TAG: ${prodTag}"
+    def groupId = getGroupIdFromPom("pom.xml")
+    def artifactId = getArtifactIdFromPom("pom.xml")
+    def version = getVersionFromPom("pom.xml")
+    // Set the tag for the development image: version + build number
+    def devTag = "${version}-${BUILD_NUMBER}"
+    // Set the tag for the production image: version
+    def prodTag = "${version}"
+    echo " Dev TAG: ${devTag}"
+    echo " Prod TAG: ${prodTag}"
 
-      def mvnCmd = "mvn -s ./nexus_settings.xml"
-      echo "mvnCmd: ${mvnCmd}"
+    def mvnCmd = "mvn -s ./nexus_settings.xml"
+    echo "mvnCmd: ${mvnCmd}"
 
-      stages {
-        stage('Build war') {
+    stages {
+      // Checkout Source Code.
+      stage('Checkout Source') {
+        git url: 'https://github.com/cfoskin/appvdev_homework.git'
+      }
+      stage('Build war') {
+        dir("MLBParks") {
           echo 'Build war'
         }
-        stage('Unit Tests') {
-          echo 'Unit Tests'
-        }
-        stage('Code Analysis') {
-          echo 'Code Analysis'
-        }
-        stage('Build and Tag OpenShift Image') {
-          echo 'Build and Tag OpenShift Image'
-        }
-        stage('Publish to Nexus') {
-          echo 'Publish to Nexus'
-        }
-        stage('Deploy to Dev') {
-          echo 'Deploy to Dev'
-        }
-        stage('Integration Tests') {
-          echo 'Integration Tests'
-        }
-        stage('Copy Image to Nexus Docker Registry') {
-          echo 'Copy Image to Nexus Docker Registry'
-        }
-        stage('Blue/Green Production Deployment') {
-          echo 'Blue/Green Production Deployment'
-        }
-        stage('Switch over to new Version') {
-          echo 'Switch over to new Version'
-        }
+      }
+      stage('Unit Tests') {
+        echo 'Unit Tests'
+      }
+      stage('Code Analysis') {
+        echo 'Code Analysis'
+      }
+      stage('Build and Tag OpenShift Image') {
+        echo 'Build and Tag OpenShift Image'
+      }
+      stage('Publish to Nexus') {
+        echo 'Publish to Nexus'
+      }
+      stage('Deploy to Dev') {
+        echo 'Deploy to Dev'
+      }
+      stage('Integration Tests') {
+        echo 'Integration Tests'
+      }
+      stage('Copy Image to Nexus Docker Registry') {
+        echo 'Copy Image to Nexus Docker Registry'
+      }
+      stage('Blue/Green Production Deployment') {
+        echo 'Blue/Green Production Deployment'
+      }
+      stage('Switch over to new Version') {
+        echo 'Switch over to new Version'
       }
     }
   }
