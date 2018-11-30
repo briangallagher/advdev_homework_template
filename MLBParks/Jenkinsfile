@@ -11,28 +11,28 @@ node('maven-appdev') {
     echo "${openshift.raw( "version" ).out}"
     echo "In project: ${openshift.project()}"
 
-    def groupId = getGroupIdFromPom("pom.xml")
-    def artifactId = getArtifactIdFromPom("pom.xml")
-    def version = getVersionFromPom("pom.xml")
-    // Set the tag for the development image: version + build number
-    def devTag = "${version}-${BUILD_NUMBER}"
-    // Set the tag for the production image: version
-    def prodTag = "${version}"
-    echo " Dev TAG: ${devTag}"
-    echo " Prod TAG: ${prodTag}"
+    // Checkout Source Code.
+    stage('Checkout Source') {
+      git url: 'https://github.com/cfoskin/appvdev_homework.git'
+    }
 
-    def mvnCmd = "mvn -s ./nexus_settings.xml"
-    echo "mvnCmd: ${mvnCmd}"
+    dir("MLBParks") {
 
-    stages {
-      // Checkout Source Code.
-      stage('Checkout Source') {
-        git url: 'https://github.com/cfoskin/appvdev_homework.git'
-      }
+      def groupId = getGroupIdFromPom("pom.xml")
+      def artifactId = getArtifactIdFromPom("pom.xml")
+      def version = getVersionFromPom("pom.xml")
+      // Set the tag for the development image: version + build number
+      def devTag = "${version}-${BUILD_NUMBER}"
+      // Set the tag for the production image: version
+      def prodTag = "${version}"
+      echo " Dev TAG: ${devTag}"
+      echo " Prod TAG: ${prodTag}"
+
+      def mvnCmd = "mvn -s ./nexus_settings.xml"
+      echo "mvnCmd: ${mvnCmd}"
+
       stage('Build war') {
-        dir("MLBParks") {
-          echo 'Build war'
-        }
+        echo 'Build war'
       }
       stage('Unit Tests') {
         echo 'Unit Tests'
