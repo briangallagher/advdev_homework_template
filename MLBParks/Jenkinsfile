@@ -76,9 +76,10 @@ node('maven-appdev') {
             // Update the image in the deployment config 
             // Start a new deployment
             // Verify the deployment
-            
+              
+            // 83ae-parks-dev
 
-            openshift.set("image", "${GUID}-parks-dev/mlbparks:${devTag}", )
+            openshift.set("image", "dc/mlbparks", "${GUID}-parks-dev/mlbparks:${devTag}", )
             // sh "oc set image dc/mlbparks mlbparks=docker-registry.default.svc:5000/${GUID}-parks-dev/mlbparks:${devTag} -n ${GUID}-parks-dev"
 
             def dc = openshift.selector('dc', "mlbparks")
