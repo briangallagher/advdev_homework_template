@@ -103,10 +103,43 @@ node('maven-appdev') {
 
       stage('Integration Tests') {
         echo 'Integration Tests'
+
+        sleep 30
+
+        // TODO: Will the tests fail if the curl fails? 
+        // Should maybe grep here !! 
+        // Maybe do assert ??
+
+        //check health endpoint
+        echo "Checking health endpoint"
+        sh "curl -i -H 'Content-Length: 0' -X GET http://mlbparks.${GUID}-parks-dev.svc:8080/ws/healthz/"
+
+        // checking info endpoint
+        echo "Checking info endpoint"
+        sh "curl -i -H 'Content-Length: 0' -X GET http://mlbparks.${GUID}-parks-dev.svc:8080/ws/info/"
+
       }
 
       stage('Copy Image to Nexus Docker Registry') {
         echo 'Copy Image to Nexus Docker Registry'
+
+        // Why are we copying to Nexus at this point - seems to be just for archiving ???
+        // 
+        // "Oftentimes the pipeline needs to move the tested container image to another container registry, or another OpenShift cluster entirely, for deployment to production."
+        // 
+        sh "skopeo copy --src-tls-verify=false --dest-tls-verify=false --src-creds openshift:\$(oc whoami -t) --dest-creds admin:admin123 docker://docker-registry.default.svc.cluster.local:5000/${GUID}-parks-dev/mlbparks:${devTag} docker://nexus-registry.${GUID}-nexus.svc.cluster.local:5000/mlbparks:${devTag}"
+
+        runInDevNs({openshift.tag("${GUID}-parks-dev/mlbparks:${devTag}", "${GUID}-parks-dev/mlbparks:${prodTag}")})
+
+        // // TODO: should be in closure
+        // openshift.withCluster() {
+        //   openshift.withProject( '${GUID}-parks-dev' ) {
+
+        //     // TODO: do a closure here.
+        //     // Tag the image 
+        //     openshift.tag("${GUID}-parks-dev/mlbparks:${devTag}", "${GUID}-parks-dev/mlbparks:${prodTag}")
+        //   }
+        // }
       }
 
       stage('Blue/Green Production Deployment') {
@@ -116,6 +149,15 @@ node('maven-appdev') {
       stage('Switch over to new Version') {
         echo 'Switch over to new Version'
       }
+    }
+  }
+}
+
+def runInDevNs(func) {
+  echo "Running in ${GUID}-parks-dev ... "
+  openshift.withCluster() {
+    openshift.withProject( '${GUID}-parks-dev' ) {
+      func.call()
     }
   }
 }
