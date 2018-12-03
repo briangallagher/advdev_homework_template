@@ -56,14 +56,13 @@ node('maven-appdev') {
 
             // openshift.tag("alias='false', destStream='${GUID}-parks-dev/mlbparks', destTag='${devTag}', destinationNamespace='${GUID}-parks-dev', namespace='${GUID}-parks-dev', srcStream='${GUID}-parks-dev/mlbparks', srcTag='latest', verbose='false'")
 
-            openshift.tag("'${GUID}-parks-dev/mlbparks:latest', '${GUID}-parks-dev/mlbparks:${devTag}'")         
+            openshift.tag('${GUID}-parks-dev/mlbparks:latest', '${GUID}-parks-dev/mlbparks:${devTag}')         
 
-// {reference={}, err=error: invalid SOURCE: invalid reference format, verb=tag, cmd=oc 
-// --server=https://172.30.0.1:443 --certificate-authority=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt --namespace=${GUID}-parks-dev 
-// --token=XXXXX tag alias='false', destStream='mlbparks', destTag=1.0-2, destinationNamespace='83ae-parks-dev', namespace='83ae-parks-dev', srcStream='mlbparks', srcTag='latest', verbose='false' , out=, status=1}
+            // openshift.tag("openshift/ruby:2.0", "yourproject/ruby:tip")
 
-// Finished: FAILURE
-// Page generated: Dec 3, 2018 12:01:54 PM UTCREST APIJenkins ver. 2.89.4
+            // {reference={}, err=error: invalid SOURCE: invalid reference format, verb=tag, cmd=oc --server=https://172.30.0.1:443 
+            // --certificate-authority=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt --namespace=${GUID}-parks-dev --token=XXXXX 
+            // tag '83ae-parks-dev/mlbparks:latest', '83ae-parks-dev/mlbparks:1.0-5' , out=, status=1}
 
           }
         }
