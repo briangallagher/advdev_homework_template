@@ -45,6 +45,7 @@ echo "Mongodb Deployment complete"
 # Create binary build config here to be used in the Jenkins pipeline. 
 # The pipeline will inject the binary and then start a build below
 # for example: oc start-build parksmap --follow --from-file=./target/parksmap.jar -n $GUID-parks-dev
+# mlbparks is a war file for needs jboss. The other 2 are just jars so openjdk is enough.
 echo "Creating binary build configs.."
 oc new-build --binary=true --name="mlbparks" -i=jboss-eap70-openshift:1.7 -n $DEV_PROJECT
 oc new-build --binary=true --name="nationalparks" -i=redhat-openjdk18-openshift:1.2 -n $DEV_PROJECT
@@ -53,9 +54,9 @@ oc new-build --binary=true --name="parksmap" -i=redhat-openjdk18-openshift:1.2 -
 
 # Set up placeholder deployment configs that will be updated in time
 echo "Creating Deployment Configs.."
-oc new-app $DEV_PROJECT/mlbparks --name=mlbparks -n $DEV_PROJECT
-oc new-app $DEV_PROJECT/nationalparks --name=nationalparks -n $DEV_PROJECT
-oc new-app $DEV_PROJECT/parksmap --name=parksmap -n $DEV_PROJECT
+oc new-app $DEV_PROJECT/mlbparks --allow-missing-imagestream-tags=true --name=mlbparks -n $DEV_PROJECT
+oc new-app $DEV_PROJECT/nationalparks --allow-missing-imagestream-tags=true --name=nationalparks -n $DEV_PROJECT
+oc new-app $DEV_PROJECT/parksmap --allow-missing-imagestream-tags=true --name=parksmap -n $DEV_PROJECT
 
 # Turn off triggers
 echo "Turning off all depoyment triggers as deployments will be controlled by the pipeline"

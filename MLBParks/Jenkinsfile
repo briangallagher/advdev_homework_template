@@ -46,7 +46,18 @@ node('maven-appdev') {
       stage('Build and Tag OpenShift Image') {
         echo 'Build and Tag OpenShift Image'
 
+        // TODO: look for delarative approach !! 
+        openshift.withCluster() {
+          openshift.withProject( '${GUID}-parks-dev' ) {
 
+            // Start the binary build and print the logs to the jenkins console
+            def buildSelector = openshift.selector( 'bc/mlbparks' ).startBuild('--from-file=./target/mlbparks.war')
+            buildSelector.logs('-f')
+
+            openshift.tag("alias='false', destStream='mlbparks', destTag=${devTag}, destinationNamespace='${GUID}-parks-dev', namespace='${GUID}-parks-dev', srcStream='mlbparks', srcTag='latest', verbose='false'")
+         
+          }
+        }
       }
       stage('Publish to Nexus') {
         echo 'Publish to Nexus'
