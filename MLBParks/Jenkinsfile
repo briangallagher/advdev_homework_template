@@ -78,14 +78,15 @@ node('maven-appdev') {
             // Verify the deployment
               
             // 83ae-parks-dev
-            openshift.set("image", "dc/mlbparks", "mlbparks=mlbparks:1.0-13" )
+            openshift.set("image", "dc/mlbparks", "mlbparks=docker-registry.default.svc:5000/mlbparks:${devTag}" )
 
             def dc = openshift.selector('dc', "mlbparks").rollout()
+            // rollout based on latest config
             dc.latest()
-            dc.status()
             // this will wait until the desired replicas are available
-            // def status = dc.rollout().status()
-
+            dc.status()
+            
+            
             // Verify that the service is running
             def connected = openshift.verifyService('mlbparks')
             if (connected) {
@@ -94,9 +95,9 @@ node('maven-appdev') {
                 echo "Unable to connect to 'mlbparks' service"
             }
 
-// openshiftDeploy depCfg: 'mlbparks', namespace: 'e05e-parks-dev', verbose: 'false', waitTime: '', waitUnit: 'sec'
-// openshiftVerifyDeployment depCfg: 'mlbparks', namespace: 'e05e-parks-dev', replicaCount: '1', verbose: 'false', verifyReplicaCount: 'false', waitTime: '', waitUnit: 'sec'
-// openshiftVerifyService namespace: 'e05e-parks-dev', svcName: 'mlbparks', verbose: 'false'
+  // openshiftDeploy depCfg: 'mlbparks', namespace: 'e05e-parks-dev', verbose: 'false', waitTime: '', waitUnit: 'sec'
+  // openshiftVerifyDeployment depCfg: 'mlbparks', namespace: 'e05e-parks-dev', replicaCount: '1', verbose: 'false', verifyReplicaCount: 'false', waitTime: '', waitUnit: 'sec'
+  // openshiftVerifyService namespace: 'e05e-parks-dev', svcName: 'mlbparks', verbose: 'false'
 
           }
         }
