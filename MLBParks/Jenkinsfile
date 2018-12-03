@@ -54,7 +54,7 @@ node('maven-appdev') {
             def buildSelector = openshift.selector( 'bc/mlbparks' ).startBuild('--from-file=./target/mlbparks.war')
             buildSelector.logs('-f')
 
-            openshift.tag("alias='false', destStream='mlbparks', destTag='${devTag}', destinationNamespace='${GUID}-parks-dev', namespace='${GUID}-parks-dev', srcStream='mlbparks', srcTag='latest', verbose='false'")
+            openshift.tag("alias='false', destStream='${GUID}-parks-dev/mlbparks', destTag='${devTag}', destinationNamespace='${GUID}-parks-dev', namespace='${GUID}-parks-dev', srcStream='${GUID}-parks-dev/mlbparks', srcTag='latest', verbose='false'")
          
 
 // {reference={}, err=error: invalid SOURCE: invalid reference format, verb=tag, cmd=oc 
@@ -63,7 +63,6 @@ node('maven-appdev') {
 
 // Finished: FAILURE
 // Page generated: Dec 3, 2018 12:01:54 PM UTCREST APIJenkins ver. 2.89.4
-
 
           }
         }
