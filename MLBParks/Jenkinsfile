@@ -64,7 +64,7 @@ node('maven-appdev') {
 
       stage('Publish to Nexus') {
         echo 'Publish to Nexus'
-        sh "${mvnCmd} deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::http://nexus3-${GUID}-nexus.apps.na39.openshift.opentlc.com/repository/releases"
+        sh "${mvnCmd} deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::http://nexus3-${GUID}-nexus3.apps.na39.openshift.opentlc.com/repository/releases"
       }
 
       stage('Deploy to Dev') {
@@ -127,8 +127,9 @@ node('maven-appdev') {
         // 
         // "Oftentimes the pipeline needs to move the tested container image to another container registry, or another OpenShift cluster entirely, for deployment to production."
         // 
-        sh "skopeo copy --src-tls-verify=false --dest-tls-verify=false --src-creds openshift:\$(oc whoami -t) --dest-creds admin:admin123 docker://docker-registry.default.svc.cluster.local:5000/${GUID}-parks-dev/mlbparks:${devTag} docker://nexus-registry.${GUID}-nexus.svc.cluster.local:5000/mlbparks:${devTag}"
+        sh "skopeo copy --src-tls-verify=false --dest-tls-verify=false --src-creds openshift:\$(oc whoami -t) --dest-creds admin:admin123 docker://docker-registry.default.svc.cluster.local:5000/${GUID}-parks-dev/mlbparks:${devTag} docker://nexus-registry.${GUID}-nexus3.svc.cluster.local:5000/mlbparks:${devTag}"
 
+        // Tag the image with the prod tag. Prod will pull the image from here and then tag in its own namespace once confirmed
         runInDevNs({openshift.tag("${GUID}-parks-dev/mlbparks:${devTag}", "${GUID}-parks-dev/mlbparks:${prodTag}")})
 
         // // TODO: should be in closure
