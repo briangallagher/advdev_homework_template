@@ -78,7 +78,8 @@ node('maven-appdev') {
             // Verify the deployment
               
             // 83ae-parks-dev
-            openshift.set("image", "dc/mlbparks", "mlbparks=docker-registry.default.svc:5000/mlbparks:${devTag}" )
+            // openshift.set("image", "dc/mlbparks", "mlbparks=docker-registry.default.svc:5000/${GUID}-parks-dev/mlbparks:${devTag}" )
+            openshift.set("image", "dc/mlbparks", "docker-registry.default.svc:5000/${GUID}-parks-dev/mlbparks:${devTag}" )
 
             def dc = openshift.selector('dc', "mlbparks").rollout()
             // rollout based on latest config
