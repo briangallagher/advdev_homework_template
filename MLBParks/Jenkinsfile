@@ -85,21 +85,21 @@ node('maven-appdev') {
             // rollout based on latest config
             dc.latest()
             // this will wait until the desired replicas are available
+            // TODO: this will just hang?? Not great
             dc.status()
             
+
+            // TODO: not sure how to verify the service 
+            // this does not seem to be available in the plugin version in my current jenkins
+            // The plugin on jenkins is <version>1.0.7</version> but the latest is <version>1.0.23-SNAPSHOT</version>
             
-            // Verify that the service is running
-            def connected = openshift.verifyService('mlbparks')
-            if (connected) {
-                echo "Able to connect to 'mlbparks' service"
-            } else {
-                echo "Unable to connect to 'mlbparks' service"
-            }
-
-  // openshiftDeploy depCfg: 'mlbparks', namespace: 'e05e-parks-dev', verbose: 'false', waitTime: '', waitUnit: 'sec'
-  // openshiftVerifyDeployment depCfg: 'mlbparks', namespace: 'e05e-parks-dev', replicaCount: '1', verbose: 'false', verifyReplicaCount: 'false', waitTime: '', waitUnit: 'sec'
-  // openshiftVerifyService namespace: 'e05e-parks-dev', svcName: 'mlbparks', verbose: 'false'
-
+            // // Verify that the service is running not available on <version>1.0.7</version>
+            // def connected = openshift.verifyService('mlbparks')
+            // if (connected) {
+            //     echo "Able to connect to 'mlbparks' service"
+            // } else {
+            //     echo "Unable to connect to 'mlbparks' service"
+            // }
           }
         }
       }
@@ -149,9 +149,6 @@ node('maven-appdev') {
       stage('Blue/Green Production Deployment') {
         echo 'Blue/Green Production Deployment'
 
-
-
-
         activeApp = sh(returnStdout: true, script: "oc get route mlbparks -n ${GUID}-parks-prod -o jsonpath='{ .spec.to.name }'").trim()
         if (activeApp == "mlbparks-green") {
           destApp = "mlbparks-blue"
@@ -159,17 +156,22 @@ node('maven-appdev') {
         echo "Active Application:      " + activeApp
         echo "Destination Application: " + destApp
 
-        Update the Image on the Production Deployment Config
+        // Update the Image on the Production Deployment Config
         sh "oc set image dc/${destApp} ${destApp}=docker-registry.default.svc:5000/${GUID}-parks-dev/mlbparks:${prodTag} -n ${GUID}-parks-prod"
 
         // Deploy the inactive application.
-        openshiftDeploy depCfg: destApp, namespace: 'e05e-parks-prod', verbose: 'false', waitTime: '', waitUnit: 'sec'
-        openshiftVerifyDeployment depCfg: destApp, namespace: 'e05e-parks-prod', replicaCount: '1', verbose: 'false', verifyReplicaCount: 'true', waitTime: '', waitUnit: 'sec'
-        openshiftVerifyService namespace: 'e05e-parks-prod', svcName: destApp, verbose: 'false'
+        
 
 
 
 
+
+
+
+
+        // openshiftDeploy depCfg: destApp, namespace: 'e05e-parks-prod', verbose: 'false', waitTime: '', waitUnit: 'sec'
+        // openshiftVerifyDeployment depCfg: destApp, namespace: 'e05e-parks-prod', replicaCount: '1', verbose: 'false', verifyReplicaCount: 'true', waitTime: '', waitUnit: 'sec'
+        // openshiftVerifyService namespace: 'e05e-parks-prod', svcName: destApp, verbose: 'false'
       }
 
       stage('Switch over to new Version') {
