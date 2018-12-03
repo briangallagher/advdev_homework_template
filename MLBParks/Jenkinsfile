@@ -35,18 +35,20 @@ node('maven-appdev') {
         echo "Building version ${devTag}"
         sh "${mvnCmd} clean package -DskipTests"
       }
+
       stage('Unit Tests') {
         echo "Running Unit Tests"
         sh "${mvnCmd} test"
       }
+
       stage('Code Analysis') {
         echo "Running Code Analysis"
         sh "${mvnCmd} sonar:sonar -Dsonar.host.url=http://sonarqube-${GUID}-sonarqube.apps.na39.openshift.opentlc.com -Dsonar.projectName=${JOB_BASE_NAME}-${devTag}"
       }
+
       stage('Build and Tag OpenShift Image') {
         echo 'Build and Tag OpenShift Image'
 
-        // TODO: look for delarative approach !! 
         openshift.withCluster() {
           openshift.withProject( '${GUID}-parks-dev' ) {
 
@@ -54,34 +56,63 @@ node('maven-appdev') {
             def buildSelector = openshift.selector( 'bc/mlbparks' ).startBuild('--from-file=./target/mlbparks.war')
             buildSelector.logs('-f')
 
-            // openshift.tag("alias='false', destStream='${GUID}-parks-dev/mlbparks', destTag='${devTag}', destinationNamespace='${GUID}-parks-dev', namespace='${GUID}-parks-dev', srcStream='${GUID}-parks-dev/mlbparks', srcTag='latest', verbose='false'")
-
+            // Tagging the image here makes it available to in dev
             openshift.tag("${GUID}-parks-dev/mlbparks:latest", "${GUID}-parks-dev/mlbparks:${devTag}")         
+          }
+        }
+      }
 
-            // openshift.tag("openshift/ruby:2.0", "yourproject/ruby:tip")
+      stage('Publish to Nexus') {
+        echo 'Publish to Nexus'
+        sh "${mvnCmd} deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::http://nexus3-${GUID}-nexus.apps.na39.openshift.opentlc.com/repository/releases"
+      }
 
-            // {reference={}, err=error: invalid SOURCE: invalid reference format, verb=tag, cmd=oc --server=https://172.30.0.1:443 
-            // --certificate-authority=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt --namespace=${GUID}-parks-dev --token=XXXXX 
-            // tag '83ae-parks-dev/mlbparks:latest', '83ae-parks-dev/mlbparks:1.0-5' , out=, status=1}
+      stage('Deploy to Dev') {
+        echo 'Deploy to Dev'
+
+        openshift.withCluster() {
+          openshift.withProject( '${GUID}-parks-dev' ) {
+
+            // Update the image in the deployment config 
+            // Start a new deployment
+            // Verify the deployment
+            
+
+            openshift.set("image", "${GUID}-parks-dev/mlbparks:${devTag}", )
+            // sh "oc set image dc/mlbparks mlbparks=docker-registry.default.svc:5000/${GUID}-parks-dev/mlbparks:${devTag} -n ${GUID}-parks-dev"
+
+            def dc = openshift.selector('dc', "mlbparks").rollout()
+            // this will wait until the desired replicas are available
+            def status = dc.rollout().status()
+
+            // Verify that the service is running
+            def connected = openshift.verifyService('mlbparks')
+            if (connected) {
+                echo "Able to connect to 'mlbparks'"
+            } else {
+                echo "Unable to connect to 'mlbparks'"
+            }
+
+// openshiftDeploy depCfg: 'mlbparks', namespace: 'e05e-parks-dev', verbose: 'false', waitTime: '', waitUnit: 'sec'
+// openshiftVerifyDeployment depCfg: 'mlbparks', namespace: 'e05e-parks-dev', replicaCount: '1', verbose: 'false', verifyReplicaCount: 'false', waitTime: '', waitUnit: 'sec'
+// openshiftVerifyService namespace: 'e05e-parks-dev', svcName: 'mlbparks', verbose: 'false'
 
           }
         }
       }
-      stage('Publish to Nexus') {
-        echo 'Publish to Nexus'
-      }
-      stage('Deploy to Dev') {
-        echo 'Deploy to Dev'
-      }
+
       stage('Integration Tests') {
         echo 'Integration Tests'
       }
+
       stage('Copy Image to Nexus Docker Registry') {
         echo 'Copy Image to Nexus Docker Registry'
       }
+
       stage('Blue/Green Production Deployment') {
         echo 'Blue/Green Production Deployment'
       }
+
       stage('Switch over to new Version') {
         echo 'Switch over to new Version'
       }
