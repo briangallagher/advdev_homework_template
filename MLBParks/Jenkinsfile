@@ -54,8 +54,9 @@ node('maven-appdev') {
             def buildSelector = openshift.selector( 'bc/mlbparks' ).startBuild('--from-file=./target/mlbparks.war')
             buildSelector.logs('-f')
 
-            openshift.tag("alias='false', destStream='${GUID}-parks-dev/mlbparks', destTag='${devTag}', destinationNamespace='${GUID}-parks-dev', namespace='${GUID}-parks-dev', srcStream='${GUID}-parks-dev/mlbparks', srcTag='latest', verbose='false'")
-         
+            // openshift.tag("alias='false', destStream='${GUID}-parks-dev/mlbparks', destTag='${devTag}', destinationNamespace='${GUID}-parks-dev', namespace='${GUID}-parks-dev', srcStream='${GUID}-parks-dev/mlbparks', srcTag='latest', verbose='false'")
+
+            openshift.tag("'${GUID}-parks-dev/mlbparks:latest', '${GUID}-parks-dev/mlbparks:${devTag}'")         
 
 // {reference={}, err=error: invalid SOURCE: invalid reference format, verb=tag, cmd=oc 
 // --server=https://172.30.0.1:443 --certificate-authority=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt --namespace=${GUID}-parks-dev 
