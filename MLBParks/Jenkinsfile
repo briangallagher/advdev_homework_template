@@ -85,14 +85,16 @@ node('maven-appdev') {
             // rollout based on latest config
             dc.latest()
             // this will wait until the desired replicas are available
-            // TODO: this will just hang?? Not great
+            // TODO: this will just hang if fails?? Not great. Maybe need a timeout here
             dc.status()
             
 
             // TODO: not sure how to verify the service 
             // this does not seem to be available in the plugin version in my current jenkins
             // The plugin on jenkins is <version>1.0.7</version> but the latest is <version>1.0.23-SNAPSHOT</version>
-            
+            // TODO: can try update the plugin version on jenkins or find another way to verify that the service is up
+
+
             // // Verify that the service is running not available on <version>1.0.7</version>
             // def connected = openshift.verifyService('mlbparks')
             // if (connected) {
@@ -133,7 +135,7 @@ node('maven-appdev') {
         sh "skopeo copy --src-tls-verify=false --dest-tls-verify=false --src-creds openshift:\$(oc whoami -t) --dest-creds admin:admin123 docker://docker-registry.default.svc.cluster.local:5000/${GUID}-parks-dev/mlbparks:${devTag} docker://nexus-registry.${GUID}-nexus3.svc.cluster.local:5000/mlbparks:${devTag}"
 
         // Tag the image with the prod tag. Prod will pull the image from here and then tag in its own namespace once confirmed
-        runInDevNs({openshift.tag("${GUID}-parks-dev/mlbparks:${devTag}", "${GUID}-parks-dev/mlbparks:${prodTag}")})
+        runInDevNs( { openshift.tag("${GUID}-parks-dev/mlbparks:${devTag}", "${GUID}-parks-dev/mlbparks:${prodTag}") } )
 
         // // TODO: should be in closure
         // openshift.withCluster() {
@@ -149,26 +151,30 @@ node('maven-appdev') {
       stage('Blue/Green Production Deployment') {
         echo 'Blue/Green Production Deployment'
 
-        activeApp = sh(returnStdout: true, script: "oc get route mlbparks -n ${GUID}-parks-prod -o jsonpath='{ .spec.to.name }'").trim()
-        if (activeApp == "mlbparks-green") {
-          destApp = "mlbparks-blue"
+        def blueGreenDeploy = {
+
+          activeApp = sh(returnStdout: true, script: "oc get route mlbparks -n ${GUID}-parks-prod -o jsonpath='{ .spec.to.name }'").trim()
+          if (activeApp == "mlbparks-green") {
+            destApp = "mlbparks-blue"
+          }
+          echo "Active Application:      " + activeApp
+          echo "Destination Application: " + destApp
+
+          // Update the Image on the Production Deployment Config
+          sh "oc set image dc/${destApp} ${destApp}=docker-registry.default.svc:5000/${GUID}-parks-dev/mlbparks:${prodTag} -n ${GUID}-parks-prod"
+
+          // Deploy the inactive application.
+          
+          runInProdNs( { openshift.set("image", "dc/${destApp}", "${destApp}=docker-registry.default.svc:5000/${GUID}-parks-dev/mlbparks:${prodTag}" ) } )
+          
         }
-        echo "Active Application:      " + activeApp
-        echo "Destination Application: " + destApp
-
-        // Update the Image on the Production Deployment Config
-        sh "oc set image dc/${destApp} ${destApp}=docker-registry.default.svc:5000/${GUID}-parks-dev/mlbparks:${prodTag} -n ${GUID}-parks-prod"
-
-        // Deploy the inactive application.
-        
 
 
 
 
 
 
-
-
+        runInProdNs(blueGreenDeploy)
         // openshiftDeploy depCfg: destApp, namespace: 'e05e-parks-prod', verbose: 'false', waitTime: '', waitUnit: 'sec'
         // openshiftVerifyDeployment depCfg: destApp, namespace: 'e05e-parks-prod', replicaCount: '1', verbose: 'false', verifyReplicaCount: 'true', waitTime: '', waitUnit: 'sec'
         // openshiftVerifyService namespace: 'e05e-parks-prod', svcName: destApp, verbose: 'false'
@@ -181,10 +187,20 @@ node('maven-appdev') {
   }
 }
 
+// TODO: take in array of commands
 def runInDevNs(func) {
   echo "Running in ${GUID}-parks-dev ... "
   openshift.withCluster() {
     openshift.withProject( '${GUID}-parks-dev' ) {
+      func.call()
+    }
+  }
+}
+
+def runInProdNs(func) {
+  echo "Running in ${GUID}-parks-prod ... "
+  openshift.withCluster() {
+    openshift.withProject( '${GUID}-parks-prod' ) {
       func.call()
     }
   }
