@@ -1,3 +1,29 @@
+def blueGreenDeploy() {
+
+  activeApp = sh(returnStdout: true, script: "oc get route mlbparks -n ${GUID}-parks-prod -o jsonpath='{ .spec.to.name }'").trim()
+  if (activeApp == "mlbparks-green") {
+    destApp = "mlbparks-blue"
+  }
+  echo "Active Application:      " + activeApp
+  echo "Destination Application: " + destApp
+
+  
+  // Update the Image on the Production Deployment Config
+  openshift.set("image", "dc/${destApp}", "${destApp}=docker-registry.default.svc:5000/${GUID}-parks-dev/mlbparks:${prodTag}" )
+
+
+  // Deploy the inactive application.
+  def dc = openshift.selector('dc', "${destApp}").rollout()
+  // rollout based on latest config
+  dc.latest()
+  // this will wait until the desired replicas are available
+  // TODO: this will just hang if fails?? Not great. Maybe need a timeout here
+  dc.status()
+
+  // TODO: need to verify the deployment and service         
+}
+
+
 node('maven-appdev') {
   echo "GUID: ${GUID}"
   echo "CLUSTER: ${CLUSTER}"
@@ -170,30 +196,7 @@ node('maven-appdev') {
   }
 }
 
-def blueGreenDeploy() {
 
-  activeApp = sh(returnStdout: true, script: "oc get route mlbparks -n ${GUID}-parks-prod -o jsonpath='{ .spec.to.name }'").trim()
-  if (activeApp == "mlbparks-green") {
-    destApp = "mlbparks-blue"
-  }
-  echo "Active Application:      " + activeApp
-  echo "Destination Application: " + destApp
-
-  
-  // Update the Image on the Production Deployment Config
-  openshift.set("image", "dc/${destApp}", "${destApp}=docker-registry.default.svc:5000/${GUID}-parks-dev/mlbparks:${prodTag}" )
-
-
-  // Deploy the inactive application.
-  def dc = openshift.selector('dc', "${destApp}").rollout()
-  // rollout based on latest config
-  dc.latest()
-  // this will wait until the desired replicas are available
-  // TODO: this will just hang if fails?? Not great. Maybe need a timeout here
-  dc.status()
-
-  // TODO: need to verify the deployment and service         
-}
 
 // TODO: take in array of commands
 def runInDevNs(func) {
