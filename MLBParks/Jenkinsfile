@@ -56,7 +56,7 @@ node('maven-appdev') {
 
             // openshift.tag("alias='false', destStream='${GUID}-parks-dev/mlbparks', destTag='${devTag}', destinationNamespace='${GUID}-parks-dev', namespace='${GUID}-parks-dev', srcStream='${GUID}-parks-dev/mlbparks', srcTag='latest', verbose='false'")
 
-            openshift.tag('${GUID}-parks-dev/mlbparks:latest', '${GUID}-parks-dev/mlbparks:${devTag}')         
+            openshift.tag("${GUID}-parks-dev/mlbparks:latest", "${GUID}-parks-dev/mlbparks:${devTag}")         
 
             // openshift.tag("openshift/ruby:2.0", "yourproject/ruby:tip")
 
