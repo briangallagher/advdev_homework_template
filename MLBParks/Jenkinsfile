@@ -178,7 +178,6 @@ node('maven-appdev') {
           // TODO: need to verify the deployment and service         
         })
 
-
         // openshiftDeploy depCfg: destApp, namespace: 'e05e-parks-prod', verbose: 'false', waitTime: '', waitUnit: 'sec'
         // openshiftVerifyDeployment depCfg: destApp, namespace: 'e05e-parks-prod', replicaCount: '1', verbose: 'false', verifyReplicaCount: 'true', waitTime: '', waitUnit: 'sec'
         // openshiftVerifyService namespace: 'e05e-parks-prod', svcName: destApp, verbose: 'false'
@@ -191,7 +190,6 @@ node('maven-appdev') {
         echo "Switching Production application to ${destApp}."
         sh "oc project ${GUID}-parks-prod "
         sh 'oc patch route mlbparks -p \'{"spec":{"to":{"name":"' + destApp + '"}}}\''        
-
       }
     }
   }
