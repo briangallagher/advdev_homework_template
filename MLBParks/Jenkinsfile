@@ -151,18 +151,14 @@ node('maven-appdev') {
       stage('Blue/Green Production Deployment') {
         echo 'Blue/Green Production Deployment'
 
-        // runInProdNs(blueGreenDeploy)
+        activeApp = sh(returnStdout: true, script: "oc get route mlbparks -n ${GUID}-parks-prod -o jsonpath='{ .spec.to.name }'").trim()
+        if (activeApp == "mlbparks-green") {
+          destApp = "mlbparks-blue"
+        }
+        echo "Active Application:      " + activeApp
+        echo "Destination Application: " + destApp
 
         runInProdNs({
-
-          activeApp = sh(returnStdout: true, script: "oc get route mlbparks -n ${GUID}-parks-prod -o jsonpath='{ .spec.to.name }'").trim()
-          if (activeApp == "mlbparks-green") {
-            destApp = "mlbparks-blue"
-          }
-          echo "Active Application:      " + activeApp
-          echo "Destination Application: " + destApp
-
-          
           // Update the Image on the Production Deployment Config
           openshift.set("image", "dc/${destApp}", "${destApp}=docker-registry.default.svc:5000/${GUID}-parks-dev/mlbparks:${prodTag}" )
 
